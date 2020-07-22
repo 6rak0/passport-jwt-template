@@ -1,8 +1,12 @@
 const express = require('express')
 const passport = require('passport')
+const path = require('path')
+//const cors = require('cors')
 
 // configuración general
 
+//puerto
+const PORT = process.env.PORT || 3000
 //acceso a variables de entorno
 require('dotenv').config()
 //crea el servidor express
@@ -19,12 +23,22 @@ server.use(passport.initialize())
 server.use(express.json())
 server.use(express.urlencoded({extended: true}))
 
+//server.use(cors())
+
 //routes
 
 //importa las rutas definidas en /routes/index.js
-server.use(require('./routes'))
+server.use('/api', require('./routes'))
+
+//configura la ruta para que el servidor despliegue el contenido estático (frontend)
+if (process.env.NODE_ENV === 'production'){
+  server.use(express.static('client/build'))
+  server.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'))
+  })
+}
 
 //servidor
 
 //puerto del servidor
-server.listen(3000, ()=>console.log('servidor listo en puerto 3000'))
+server.listen(PORT, () => console.log(`servidor listo en puerto ${PORT}`))
